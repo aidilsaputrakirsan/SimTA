@@ -12,7 +12,13 @@ const supabase = createClient(
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+// Aktifkan CORS
+app.use(cors({
+    origin: 'https://aidilsaputrakirsan.github.io', // Izinkan akses dari GitHub Pages
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Izinkan metode HTTP yang diperlukan
+    credentials: true // Izinkan pengiriman cookie atau header otentikasi
+  }));
+
 app.use(express.json()); // Untuk parsing JSON body
 
 // GET all items

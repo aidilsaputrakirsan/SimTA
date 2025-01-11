@@ -1,30 +1,44 @@
-import 'dotenv/config';
+// index.js
+import 'dotenv/config'; // Load variabel lingkungan dari .env
 import express from 'express';
 import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
-import serverless from 'serverless-http'; // Import serverless-http
 
+// Buat instance Supabase
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
 
 const app = express();
+const port = process.env.PORT || 3000;
 
+// Daftar origin yang diizinkan
 const allowedOrigins = [
-  'https://aidilsaputrakirsan.github.io',
   'http://localhost:3000',
   'http://localhost:5173',
+  'https://aidilsaputrakirsan.github.io',
+  // Tambahkan domain lain yang Anda gunakan, contoh:
+  //'https://simta-backend-irdmswmzw-aidilsaputrakirsans-projects.vercel.app',
+  //'https://your-frontend-domain.vercel.app',
 ];
 
+// Konfigurasi CORS
 app.use(
   cors({
     origin: function (origin, callback) {
+      // Izinkan request tanpa origin (misalnya Postman/cURL)
       if (!origin) return callback(null, true);
+
+      // Cek apakah origin sudah terdaftar
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        // Production: sebaiknya tolak origin yang tidak dikenal
+        // callback(new Error('Not allowed by CORS'));
+        
+        // Debugging: kita izinkan semua, agar tidak repot
+        callback(null, true);
       }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -32,9 +46,10 @@ app.use(
   })
 );
 
+// Middleware untuk parsing JSON body
 app.use(express.json());
 
-// Define your routes as usual
+// GET all items
 app.get('/items', async (req, res) => {
   try {
     const { data, error } = await supabase.from('items').select('*');
@@ -50,12 +65,11 @@ app.get('/items', async (req, res) => {
   }
 });
 
-
 // POST new item
 app.post('/items', async (req, res) => {
   const { name, date_of_birth } = req.body;
 
-  // Validasi data
+  // Validasi input
   if (!name || !date_of_birth) {
     return res.status(400).json({ error: 'Name and date_of_birth are required' });
   }
@@ -66,6 +80,7 @@ app.post('/items', async (req, res) => {
       .insert([{ name, date_of_birth }])
       .select();
     if (error) throw error;
+
     res.status(201).json(data);
   } catch (err) {
     console.error('Error creating item:', err);
@@ -77,25 +92,55 @@ app.post('/items', async (req, res) => {
 app.put('/items/:id', async (req, res) => {
   const { id } = req.params;
   const { name, date_of_birth } = req.body;
-  const { data, error } = await supabase
-    .from('items')
-    .update({ name, date_of_birth })
-    .eq('id', id)
-    .select();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+
+  try {
+    const { data, error } = await supabase
+      .from('items')
+      .update({ name, date_of_birth })
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      console.error('Error updating item:', error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error('Server error:', err);
+    res.status(500).json({ error: 'Failed to update item' });
+  }
 });
 
 // DELETE item
 app.delete('/items/:id', async (req, res) => {
   const { id } = req.params;
-  const { data, error } = await supabase.from('items').delete().eq('id', id).select();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+
+  try {
+    const { data, error } = await supabase
+      .from('items')
+      .delete()
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      console.error('Error deleting item:', error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error('Server error:', err);
+    res.status(500).json({ error: 'Failed to delete item' });
+  }
 });
 
-export const handler = serverless(app); // Export handler for Vercel
+// Jalankan server di lokal
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`Server berjalan di port ${port}`);
+  });
+}
 
-app.listen(port, () => {
-  console.log(`Server berjalan di port ${port}`);
-});
+// Vercel butuh export default app
+export default app;

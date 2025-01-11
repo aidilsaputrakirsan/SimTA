@@ -19,9 +19,11 @@ function App() {
   const fetchItems = async () => {
     try {
       const response = await axios.get(`${backendUrl}/items`);
+      console.log('Response from backend:', response.data); // Debugging
       setItems(response.data);
       setLoading(false);
     } catch (err) {
+      console.error('Error fetching items:', err);
       setError(err.message);
       setLoading(false);
     }
@@ -32,6 +34,7 @@ function App() {
       await axios.delete(`${backendUrl}/items/${id}`);
       setItems(items.filter(item => item.id !== id));
     } catch (err) {
+      console.error('Error deleting item:', err);
       setError(err.message);
     }
   };
@@ -55,6 +58,7 @@ function App() {
       fetchItems(); // Refetch items setelah update
       setEditItemId(null);
     } catch (err) {
+      console.error('Error updating item:', err);
       setError(err.message);
     }
   };

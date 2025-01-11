@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 
 // Aktifkan CORS
 app.use(cors({
-    origin: 'https://aidilsaputrakirsan.github.io', // Izinkan akses dari GitHub Pages
+    origin: 'https://aidilsaputrakirsan.github.io/SimTA', // Izinkan akses dari GitHub Pages
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Izinkan metode HTTP yang diperlukan
     credentials: true // Izinkan pengiriman cookie atau header otentikasi
   }));

@@ -3,6 +3,9 @@ import axios from 'axios';
 import ItemList from './components/ItemList';
 import ItemForm from './components/ItemForm';
 
+// Simpan URL backend dari Vercel
+const backendUrl = 'https://simta-backend-irdmswmzw-aidilsaputrakirsans-projects.vercel.app';
+
 function App() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +18,7 @@ function App() {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/items');
+      const response = await axios.get(`${backendUrl}/items`);
       setItems(response.data);
       setLoading(false);
     } catch (err) {
@@ -26,7 +29,7 @@ function App() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/items/${id}`);
+      await axios.delete(`${backendUrl}/items/${id}`);
       setItems(items.filter(item => item.id !== id));
     } catch (err) {
       setError(err.message);
@@ -36,7 +39,7 @@ function App() {
   const handleCreate = async (data) => {
     console.log('Creating item with data:', data); // Debugging
     try {
-      const response = await axios.post('http://localhost:3000/items', data);
+      const response = await axios.post(`${backendUrl}/items`, data);
       fetchItems(); // Refetch items setelah create
       setEditItemId(null);
     } catch (err) {
@@ -48,7 +51,7 @@ function App() {
   const handleUpdate = async (id, data) => {
     console.log(`Updating item ${id} with data:`, data); // Debugging
     try {
-      await axios.put(`http://localhost:3000/items/${id}`, data);
+      await axios.put(`${backendUrl}/items/${id}`, data);
       fetchItems(); // Refetch items setelah update
       setEditItemId(null);
     } catch (err) {

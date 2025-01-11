@@ -4,7 +4,7 @@ import ItemList from './components/ItemList';
 import ItemForm from './components/ItemForm';
 
 // Simpan URL backend dari Vercel
-const backendUrl = 'https://simta-backend-irdmswmzw-aidilsaputrakirsans-projects.vercel.app';
+const backendUrl = 'https://simta-backend-irdmswmzw-aidilsaputrakirsans-projects.vercel.app/api';
 
 function App() {
   const [items, setItems] = useState([]);
